@@ -40,24 +40,15 @@ class VKOAuth2Adapter(OAuth2Adapter):
     profile_url = 'https://api.vk.com/method/users.get'
 
     def complete_login(self, request, app, token, **kwargs):
-        uid = kwargs['response'].get('user_id')
         params = {
-            'v': '5.95',
+            'v': '3.0',
             'access_token': token.token,
             'fields': ','.join(USER_FIELDS),
         }
-        if uid:
-            params['user_ids'] = uid
-        resp = requests.get(self.profile_url,
-                            params=params)
+        resp = requests.get(self.profile_url, params=params)
         resp.raise_for_status()
         extra_data = resp.json()['response'][0]
-        email = kwargs['response'].get('email')
-        if email:
-            extra_data['email'] = email
-        return self.get_provider().sociallogin_from_response(request,
-                                                             extra_data)
-
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 oauth2_login = OAuth2LoginView.adapter_view(VKOAuth2Adapter)
 oauth2_callback = OAuth2CallbackView.adapter_view(VKOAuth2Adapter)
